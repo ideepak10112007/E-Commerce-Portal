@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LuciDeep — E-Commerce Demo</title>
+<style>
+  :root{
+    --bg:#0f172a;        /* slate-900 */
+    --card:#111827;      /* gray-900 */
+    --muted:#94a3b8;     /* slate-400 */
+    --text:#e5e7eb;      /* gray-200 */
+    --accent:#22c55e;    /* green-500 */
+    --accent-2:#38bdf8;  /* sky-400 */
+    --danger:#ef4444;    /* red-500 */
+    --warn:#f59e0b;      /* amber-500 */
+    --shadow:0 10px 30px rgba(0,0,0,.25);
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:linear-gradient(145deg,#0b1226 0%,#0f172a 60%,#0b1226 100%);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  a{color:inherit;text-decoration:none}
+  img{display:block;max-width:100%;height:auto;border-radius:14px}
+  .container{max-width:1200px;margin:0 auto;padding:16px}
+  /* NAV */
+  nav{position:sticky;top:0;z-index:50;background:rgba(2,6,23,.75);backdrop-filter:blur(10px);border-bottom:1px solid rgba(148,163,184,.2)}
+  .nav-inner{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:10px 16px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.5px}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:conic-gradient(from 0deg, var(--accent), var(--accent-2))}
+  .menu{display:flex;flex-wrap:wrap;gap:10px}
+  .menu a{padding:8px 12px;border-radius:10px;border:1px solid rgba(148,163,184,.18);transition:.2s}
+  .menu a:hover{background:rgba(56,189,248,.1);border-color:rgba(56,189,248,.4)}
+  .actions{display:flex;gap:8px}
+  .btn{padding:8px 12px;border-radius:10px;border:1px solid rgba(148,163,184,.2);background:rgba(2,6,23,.6);cursor:pointer;color:var(--text)}
+  .btn:hover{border-color:rgba(56,189,248,.5)}
+  .btn.primary{background:linear-gradient(135deg,var(--accent),#16a34a);border:none}
+  .pill{font-size:.85rem;padding:6px 10px;border-radius:999px;background:rgba(148,163,184,.15);border:1px solid rgba(148,163,184,.25)}
+  /* HERO */
+  .hero{padding:42px 16px 10px}
+  .hero-card{background:radial-gradient(1200px 500px at 10% -10%,rgba(56,189,248,.2),transparent),linear-gradient(180deg,rgba(2,6,23,.0),rgba(2,6,23,.6));border:1px solid rgba(56,189,248,.25);border-radius:24px;box-shadow:var(--shadow);padding:28px}
+  .hero h1{font-size:clamp(28px,4vw,44px);margin:0 0 8px}
+  .hero p{color:var(--muted);margin:0 0 14px}
+  .grid{display:grid;gap:16px}
+  .grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .grid.cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+  @media (max-width:980px){.grid.cols-4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:680px){.grid.cols-3,.grid.cols-2,.grid.cols-4{grid-template-columns:1fr}}
+  .section{padding:20px 16px}
+  .section h2{margin:6px 0 12px}
+  .card{background:rgba(17,24,39,.75);border:1px solid rgba(148,163,184,.18);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .chip{padding:6px 10px;border-radius:999px;border:1px solid rgba(148,163,184,.25);background:rgba(148,163,184,.12);cursor:pointer}
+  .chip.active{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.5)}
+  .price{font-weight:700}
+  .strike{color:var(--muted);text-decoration:line-through;margin-left:8px;font-weight:500}
+  .small{font-size:.9rem;color:var(--muted)}
+  .muted{color:var(--muted)}
+  .right{margin-left:auto}
+  .stars{font-size:1rem;color:#fbbf24}
+  .product{display:flex;gap:12px;flex-direction:column}
+  .product .row-btns{display:flex;gap:8px}
+  .btn.ghost{background:rgba(148,163,184,.12)}
+  .btn.danger{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.4)}
+  .btn.warn{background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.4)}
+  .inline-form{display:grid;gap:10px}
+  input,select,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(148,163,184,.3);background:rgba(2,6,23,.5);color:var(--text)}
+  label{font-size:.9rem;color:var(--muted)}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media (max-width:680px){.two{grid-template-columns:1fr}}
+  .error{color:var(--danger);font-size:.9rem}
+  .success{color:var(--accent);font-size:.95rem}
+  /* BADGE COUNTS */
+  .badge{background:var(--accent);color:#03240d;font-weight:800;padding:2px 8px;border-radius:999px;margin-left:6px}
+  /* MODAL */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:60}
+  .modal.open{display:flex}
+  .modal .content{max-width:650px;width:100%;background:rgba(17,24,39,.95);border:1px solid rgba(148,163,184,.2);border-radius:16px;box-shadow:var(--shadow);padding:18px}
+  .close-x{border:none;background:transparent;color:var(--muted);font-size:20px;cursor:pointer}
+  /* TABLES */
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:10px;border-bottom:1px solid rgba(148,163,184,.2);text-align:left}
+  th{color:var(--muted);font-weight:600}
+  /* FOOTER */
+  footer{padding:30px 16px;color:var(--muted);text-align:center}
+  .hidden{display:none !important}
+</style>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner container">
+      <div class="brand"><span class="dot"></span> <span>LuciDeep</span></div>
+      <div class="menu">
+        <a href="#home">Home</a>
+        <a href="#products">Product Items</a>
+        <a href="#orders">Orders</a>
+        <a href="#wishlist">Wishlist</a>
+        <a href="#reviews">Comments & Reviews</a>
+        <a href="#care">Customer Care</a>
+        <a href="#report">Reporting</a>
+        <a href="#about">About Us</a>
+        <a href="#contact">Contact Us</a>
+      </div>
+      <div class="actions">
+        <button class="btn" id="openLogin">Login</button>
+        <button class="btn" id="openRegister">Register</button>
+        <button class="btn ghost" id="openCart">Cart <span id="cartCount" class="badge">0</span></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="home" class="hero">
+    <div class="container">
+      <div class="hero-card">
+        <div class="grid cols-2">
+          <div>
+            <h1>Shop smart. Save time. <span class="pill">LuciDeep</span></h1>
+            <p>One sleek demo portal with real-time images, client-side storage, form validation, cart, wishlist, orders, reviews, customer care & reporting — all in a single HTML file.</p>
+            <div class="row" style="margin-top:10px">
+              <a class="btn primary" href="#products">Start Browsing</a>
+              <a class="btn" href="#report">View Report</a>
+              <span class="small">You’re not logged in.</span>
+            </div>
+          </div>
+          <div class="grid cols-2">
+            <!-- HERO IMAGES NOW CLICKABLE -->
+            <a href="https://source.unsplash.com/featured/?ecommerce,shopping" target="_blank" rel="noopener noreferrer">
+              <img alt="hero-1" src="https://source.unsplash.com/featured/?ecommerce,shopping" />
+            </a>
+            <a href="https://source.unsplash.com/featured/?online,store" target="_blank" rel="noopener noreferrer">
+              <img alt="hero-2" src="https://source.unsplash.com/featured/?online,store" />
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- PRODUCTS -->
+  <section id="products" class="section container">
+    <h2>Product Items</h2>
+    <div class="row" style="margin-bottom:10px">
+      <span class="muted">Filter by Category:</span>
+      <button class="chip active" data-cat="all">All</button>
+      <button class="chip" data-cat="tech">Tech</button>
+      <button class="chip" data-cat="groceries">Groceries</button>
+      <button class="chip" data-cat="appliances">Appliances</button>
+      <button class="chip" data-cat="fashion">Fashion</button>
+      <span class="right small">Tip: images are fetched in real time from Unsplash queries.</span>
+    </div>
+    <div id="productGrid" class="grid cols-4"></div>
+  </section>
+
+  <!-- ORDERS -->
+  <section id="orders" class="section container">
+    <h2>Orders List</h2>
+    <div class="card">
+      <div id="ordersEmpty" class="muted">No orders yet. Add items to cart and place an order.</div>
+      <div id="ordersWrap" class="hidden">
+        <table>
+          <thead><tr><th>Order ID</th><th>Items</th><th>Total</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody id="ordersTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- WISHLIST -->
+  <section id="wishlist" class="section container">
+    <h2>Wishlist</h2>
+    <div id="wishlistGrid" class="grid cols-4"></div>
+    <div id="wishlistEmpty" class="muted">Your wishlist is empty.</div>
+  </section>
+
+  <!-- REVIEWS -->
+  <section id="reviews" class="section container">
+    <h2>Comments & Reviews</h2>
+    <div class="card">
+      <form id="reviewForm" class="inline-form">
+        <div class="two">
+          <div>
+            <label for="reviewProduct">Product</label>
+            <select id="reviewProduct"></select>
+          </div>
+          <div>
+            <label for="reviewRating">Rating</label>
+            <select id="reviewRating">
+              <option value="5">5 ★★★★★</option>
+              <option value="4">4 ★★★★☆</option>
+              <option value="3">3 ★★★☆☆</option>
+              <option value="2">2 ★★☆☆☆</option>
+              <option value="1">1 ★☆☆☆☆</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label for="reviewText">Comment</label>
+          <textarea id="reviewText" rows="3" placeholder="Share your thoughts..."></textarea>
+        </div>
+        <div class="row">
+          <button class="btn primary" type="submit">Submit Review</button>
+          <span id="reviewMsg" class="small"></span>
+        </div>
+      </form>
+    </div>
+    <div style="height:8px"></div>
+    <div id="reviewsList" class="grid cols-3"></div>
+  </section>
+
+  <!-- CUSTOMER CARE -->
+  <section id="care" class="section container">
+    <h2>Customer Care</h2>
+    <div class="grid cols-2">
+      <div class="card">
+        <form id="careForm" class="inline-form">
+          <div class="two">
+            <div>
+              <label for="careName">Name</label>
+              <input id="careName" placeholder="Your name" required />
+            </div>
+            <div>
+              <label for="careEmail">Email</label>
+              <input id="careEmail" type="email" placeholder="you@example.com" required />
+            </div>
+          </div>
+          <div class="two">
+            <div>
+              <label for="careOrder">Order ID (optional)</label>
+              <input id="careOrder" placeholder="e.g., LD-1001" />
+            </div>
+            <div>
+              <label for="careTopic">Topic</label>
+              <select id="careTopic">
+                <option>Order Status</option>
+                <option>Returns & Refunds</option>
+                <option>Payment Issue</option>
+                <option>Account/Login</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label for="careMsg">Message</label>
+            <textarea id="careMsg" rows="3" placeholder="Describe your issue..."></textarea>
+          </div>
+          <div class="row">
+            <button class="btn primary" type="submit">Submit Ticket</button>
+            <span id="careNote" class="small"></span>
+          </div>
+        </form>
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 8px">Support SLA</h3>
+        <p class="small">Avg response: <b>2 hours</b> • Working hours: <b>9:00–18:00 IST</b> • Priority tickets auto-escalate.</p>
+        <ul class="small">
+          <li>Self-help: Check “Orders” section for live status.</li>
+          <li>Refunds usually settle in 5–7 business days.</li>
+          <li>For returns, keep original packaging for pickup.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- REPORTING -->
+  <section id="report" class="section container">
+    <h2>Reporting & Analytics</h2>
+    <div class="grid cols-3">
+      <div class="card"><div class="muted small">Total Users</div><div id="rUsers" style="font-size:28px;font-weight:800">0</div></div>
+      <div class="card"><div class="muted small">Total Orders</div><div id="rOrders" style="font-size:28px;font-weight:800">0</div></div>
+      <div class="card"><div class="muted small">Gross Revenue</div><div id="rRevenue" style="font-size:28px;font-weight:800">₹0</div></div>
+    </div>
+    <div class="card" style="margin-top:10px">
+      <div class="row">
+        <div class="muted">Export your orders as CSV for offline analysis.</div>
+        <button class="btn right" id="exportCsv">Export Orders CSV</button>
+      </div>
+      <div id="reportHint" class="small muted" style="margin-top:8px"></div>
+    </div>
+  </section>
+
+  <!-- ABOUT / CONTACT -->
+  <section id="about" class="section container">
+    <h2>About Us</h2>
+    <div class="card">
+      <p class="small">LuciDeep is a demo E-Commerce portal built with HTML, CSS, and vanilla JavaScript in a single file. It showcases client-side features like navigation, validation, cart, wishlist, orders, reviews, customer care, and reporting using localStorage — no backend required.</p>
+    </div>
+  </section>
+
+  <section id="contact" class="section container">
+    <h2>Contact Us</h2>
+    <div class="grid cols-2">
+      <div class="card">
+        <p><b>Email:</b> support@lucideep.example</p>
+        <p><b>Phone:</b> +91 98765 43210</p>
+        <p class="small muted">Address: 42, Luci Street, Chennai, TN 600001</p>
+      </div>
+      <div class="card">
+        <form id="contactForm" class="inline-form">
+          <div class="two">
+            <input id="cName" placeholder="Your name" required />
+            <input id="cEmail" type="email" placeholder="you@example.com" required />
+          </div>
+          <input id="cSubject" placeholder="Subject" required />
+          <textarea id="cBody" rows="3" placeholder="Message..."></textarea>
+          <div class="row">
+            <button class="btn primary" type="submit">Send</button>
+            <span id="cNote" class="small"></span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- AUTH MODALS -->
+  <div id="loginModal" class="modal">
+    <div class="content">
+      <div class="row">
+        <h3 style="margin:0">Login</h3>
+        <button class="close-x right" data-close="loginModal">✕</button>
+      </div>
+      <form id="loginForm" class="inline-form">
+        <input id="loginEmail" type="email" placeholder="Email" required />
+        <input id="loginPass" type="password" placeholder="Password" required />
+        <div class="row">
+          <button class="btn primary" type="submit">Login</button>
+          <span id="loginMsg" class="small"></span>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="registerModal" class="modal">
+    <div class="content">
+      <div class="row">
+        <h3 style="margin:0">Register</h3>
+        <button class="close-x right" data-close="registerModal">✕</button>
+      </div>
+      <form id="registerForm" class="inline-form">
+        <div class="two">
+          <input id="regName" placeholder="Full Name" required />
+          <input id="regPhone" placeholder="Phone (10 digits)" required />
+        </div>
+        <input id="regEmail" type="email" placeholder="Email" required />
+        <div class="two">
+          <input id="regPass" type="password" placeholder="Password (min 6 chars, 1 number)" required />
+          <input id="regPass2" type="password" placeholder="Confirm Password" required />
+        </div>
+        <div class="row">
+          <button class="btn primary" type="submit">Create Account</button>
+          <span id="regMsg" class="small"></span>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CART MODAL -->
+  <div id="cartModal" class="modal">
+    <div class="content">
+      <div class="row">
+        <h3 style="margin:0">Your Cart</h3>
+        <button class="close-x right" data-close="cartModal">✕</button>
+      </div>
+      <div id="cartEmpty" class="muted">Cart is empty.</div>
+      <div id="cartWrap" class="hidden">
+        <table>
+          <thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Subtotal</th><th></th></tr></thead>
+          <tbody id="cartTable"></tbody>
+        </table>
+        <div class="row" style="margin-top:10px">
+          <div class="muted">Total:</div>
+          <div id="cartTotal" style="font-weight:800">₹0</div>
+          <button class="btn primary right" id="placeOrder">Place Order</button>
+        </div>
+        <div id="cartNote" class="small"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* =======================
+   Simple Data & Storage
+======================= */
+const store = {
+  get(key, fallback){ try{ return JSON.parse(localStorage.getItem(key)) ?? fallback }catch{ return fallback } },
+  set(key, val){ localStorage.setItem(key, JSON.stringify(val)) }
+};
+
+/* NOTE: Added optional `href` field for each product.
+   If present, clicking the image opens this URL. Otherwise the raw image URL opens. */
+const products = [
+  // Tech
+  {id:'p1',  title:'Gaming Laptop RTX', cat:'tech',       price:79990, mrp:99990, rating:4.6,
+   img:'https://source.unsplash.com/featured/?laptop,gaming',
+   href:'https://www.flipkart.com/search?q=gaming+laptop'},
+  {id:'p2',  title:'Wireless Earbuds Pro',cat:'tech',     price:3499,  mrp:4999,  rating:4.2,
+   img:'https://source.unsplash.com/featured/?earbuds',
+   href:'https://www.amazon.in/s?k=wireless+earbuds'},
+  {id:'p3',  title:'Smartphone 5G',       cat:'tech',     price:18999, mrp:22999, rating:4.4,
+   img:'https://source.unsplash.com/featured/?smartphone',
+   href:'https://www.flipkart.com/search?q=5g+smartphone'},
+  {id:'p4',  title:'4K Smart TV 50\"',     cat:'tech',     price:32999, mrp:45999, rating:4.3,
+   img:'https://source.unsplash.com/featured/?4k,tv',
+   href:'https://www.amazon.in/s?k=4k+smart+tv'},
+  // Groceries
+  {id:'p5',  title:'Organic Apples (1kg)',cat:'groceries', price:189,   mrp:249,   rating:4.7,
+   img:'https://source.unsplash.com/featured/?apples,fruits',
+   href:'https://www.amazon.in/s?k=organic+apples'},
+  {id:'p6',  title:'Basmati Rice (5kg)',  cat:'groceries', price:649,   mrp:799,   rating:4.5,
+   img:'https://source.unsplash.com/featured/?rice,grains',
+   href:'https://www.flipkart.com/search?q=basmati+rice+5kg'},
+  {id:'p7',  title:'Arabica Coffee 500g', cat:'groceries', price:399,   mrp:499,   rating:4.6,
+   img:'https://source.unsplash.com/featured/?coffee,beans',
+   href:'https://www.amazon.in/s?k=arabica+coffee+beans'},
+  {id:'p8',  title:'Assorted Veggies Box',cat:'groceries', price:299,   mrp:399,   rating:4.4,
+   img:'https://source.unsplash.com/featured/?vegetables',
+   href:'https://www.amazon.in/s?k=vegetable+box'},
+  // Appliances
+  {id:'p9',  title:'Air Fryer 4L',        cat:'appliances',price:4999,  mrp:7999,  rating:4.3,
+   img:'https://source.unsplash.com/featured/?airfryer,kitchen',
+   href:'https://www.flipkart.com/search?q=air+fryer'},
+  {id:'p10', title:'Front-Load Washer',   cat:'appliances',price:26990, mrp:30990, rating:4.1,
+   img:'https://source.unsplash.com/featured/?washingmachine',
+   href:'https://www.amazon.in/s?k=front+load+washing+machine'},
+  {id:'p11', title:'Refrigerator 260L',   cat:'appliances',price:22990, mrp:27990, rating:4.2,
+   img:'https://source.unsplash.com/featured/?refrigerator,kitchen',
+   href:'https://www.flipkart.com/search?q=260l+refrigerator'},
+  {id:'p12', title:'Microwave Oven 23L',  cat:'appliances',price:8990,  mrp:11990, rating:4.0,
+   img:'https://source.unsplash.com/featured/?microwave,oven',
+   href:'https://www.amazon.in/s?k=23l+microwave'},
+  // Fashion
+  {id:'p13', title:'Men’s Sneakers',      cat:'fashion',   price:1999,  mrp:2999,  rating:4.3,
+   img:'https://source.unsplash.com/featured/?sneakers,shoes',
+   href:'https://www.amazon.in/s?k=mens+sneakers'},
+  {id:'p14', title:'Women’s Handbag',     cat:'fashion',   price:1599,  mrp:2399,  rating:4.4,
+   img:'https://source.unsplash.com/featured/?handbag,fashion',
+   href:'https://www.flipkart.com/search?q=women+handbag'},
+  {id:'p15', title:'Hoodie (Unisex)',     cat:'fashion',   price:999,   mrp:1499,  rating:4.2,
+   img:'https://source.unsplash.com/featured/?hoodie',
+   href:'https://www.amazon.in/s?k=hoodie+unisex'},
+  {id:'p16', title:'Analog Watch',        cat:'fashion',   price:1499,  mrp:1999,  rating:4.1,
+   img:'https://source.unsplash.com/featured/?watch,analog',
+   href:'https://www.flipkart.com/search?q=analog+watch'}
+];
+// state
+let users = store.get('users', []);            // [{name, email, phone, pass}]
+let session = store.get('session', null);      // {email}
+let cart = store.get('cart', []);              // [{id, qty}]
+let wishlist = store.get('wishlist', []);      // [id]
+let orders = store.get('orders', []);          // [{id, items:[{id,qty,price}], total, date, status}]
+let reviews = store.get('reviews', []);        // [{pid, rating, text, date}]
+/* =======================
+   Helpers
+======================= */
+const qs = s => document.querySelector(s);
+const qsa = s => [...document.querySelectorAll(s)];
+const fmt = n => '₹' + n.toLocaleString('en-IN');
+const findProduct = id => products.find(p=>p.id===id);
+function notify(el, text, ok=true){ el.textContent = text; el.className = ok ? 'small success' : 'small error'; setTimeout(()=>{el.textContent=''}, 2500); }
+function saveAll(){
+  store.set('users', users);
+  store.set('session', session);
+  store.set('cart', cart);
+  store.set('wishlist', wishlist);
+  store.set('orders', orders);
+  store.set('reviews', reviews);
+  render();
+}
+/* =======================
+   Auth & Validation
+======================= */
+const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const phoneRe = /^\d{10}$/;
+const passRe = /^(?=.*\d).{6,}$/;
+
+qs('#openLogin').onclick = ()=> qs('#loginModal').classList.add('open');
+qs('#openRegister').onclick = ()=> qs('#registerModal').classList.add('open');
+qsa('.close-x').forEach(b=> b.onclick = ()=> qs('#'+b.dataset.close).classList.remove('open'));
+
+/* Close modals on backdrop click */
+qsa('.modal').forEach(m=>{
+  m.addEventListener('click', e=>{ if(e.target===m) m.classList.remove('open'); });
+});
+
+qs('#registerForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  const name = qs('#regName').value.trim();
+  const phone = qs('#regPhone').value.trim();
+  const email = qs('#regEmail').value.trim().toLowerCase();
+  const pass = qs('#regPass').value;
+  const pass2 = qs('#regPass2').value;
+  const msg = qs('#regMsg');
+  if(!name) return notify(msg,'Enter name',false);
+  if(!phoneRe.test(phone)) return notify(msg,'Phone must be 10 digits',false);
+  if(!emailRe.test(email)) return notify(msg,'Invalid email',false);
+  if(!passRe.test(pass)) return notify(msg,'Password ≥6 chars & include a number',false);
+  if(pass!==pass2) return notify(msg,'Passwords do not match',false);
+  if(users.some(u=>u.email===email)) return notify(msg,'Email already registered',false);
+  users.push({name,email,phone,pass});
+  session = {email};
+  notify(msg,'Account created!');
+  saveAll();
+  qs('#registerModal').classList.remove('open');
+});
+
+qs('#loginForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  const email = qs('#loginEmail').value.trim().toLowerCase();
+  const pass = qs('#loginPass').value;
+  const msg = qs('#loginMsg');
+  if(!emailRe.test(email)) return notify(msg,'Invalid email',false);
+  const user = users.find(u=>u.email===email && u.pass===pass);
+  if(!user) return notify(msg,'Incorrect email or password',false);
+  session = {email};
+  notify(msg,'Welcome back!');
+  saveAll();
+  qs('#loginModal').classList.remove('open');
+});
+
+/* =======================
+   Products UI (images now links)
+======================= */
+function productCard(p){
+  const wished = wishlist.includes(p.id);
+  const link = p.href || p.img; // prefer product link, fallback to image
+  return `
+  <div class="card product" data-id="${p.id}" data-cat="${p.cat}">
+    <a href="${link}" target="_blank" rel="noopener noreferrer">
+      <img alt="${p.title}" src="${p.img}" />
+    </a>
+    <div class="row" style="justify-content:space-between">
+      <div style="font-weight:700">${p.title}</div>
+      <div class="stars">★ ${p.rating.toFixed(1)}</div>
+    </div>
+    <div class="row">
+      <div class="price">${fmt(p.price)}</div>
+      <div class="strike">${fmt(p.mrp)}</div>
+      <span class="pill">${p.cat}</span>
+    </div>
+    <div class="row-btns">
+      <button class="btn primary" data-act="addCart">Add to Cart</button>
+      <button class="btn ${wished?'warn':'ghost'}" data-act="toggleWish">${wished?'★ Wished':'♡ Wishlist'}</button>
+      <button class="btn" data-act="quickBuy">Buy Now</button>
+    </div>
+  </div>`;
+}
+function renderProducts(){
+  qs('#productGrid').innerHTML = products.map(productCard).join('');
+  // Review dropdown
+  const sel = qs('#reviewProduct');
+  sel.innerHTML = products.map(p=>`<option value="${p.id}">${p.title}</option>`).join('');
+}
+qsa('.chip').forEach(ch=>{
+  ch.onclick = ()=>{
+    qsa('.chip').forEach(c=>c.classList.remove('active'));
+    ch.classList.add('active');
+    const cat = ch.dataset.cat;
+    qsa('#productGrid .product').forEach(card=>{
+      card.style.display = (cat==='all' || card.dataset.cat===cat) ? '' : 'none';
+    });
+  }
+});
+
+qs('#productGrid').addEventListener('click', e=>{
+  const act = e.target.dataset.act;
+  if(!act) return;
+  const root = e.target.closest('.product');
+  const id = root.dataset.id;
+  if(act==='addCart'){ addToCart(id,1); }
+  if(act==='toggleWish'){ toggleWishlist(id); }
+  if(act==='quickBuy'){ addToCart(id,1); openCart(); }
+});
+
+function addToCart(id, qty=1){
+  const item = cart.find(c=>c.id===id);
+  if(item) item.qty+=qty; else cart.push({id, qty});
+  saveAll();
+}
+function toggleWishlist(id){
+  const i = wishlist.indexOf(id);
+  if(i>=0) wishlist.splice(i,1); else wishlist.push(id);
+  saveAll();
+}
+
+/* =======================
+   Cart & Orders
+======================= */
+const cartBtn = qs('#openCart');
+cartBtn.onclick = openCart;
+function openCart(){ qs('#cartModal').classList.add('open'); renderCart(); }
+
+function renderCart(){
+  const empty = qs('#cartEmpty'), wrap = qs('#cartWrap'), tbody = qs('#cartTable');
+  if(cart.length===0){ empty.classList.remove('hidden'); wrap.classList.add('hidden'); qs('#cartCount').textContent='0'; return; }
+  empty.classList.add('hidden'); wrap.classList.remove('hidden');
+  let total = 0;
+  tbody.innerHTML = cart.map(ci=>{
+    const p = findProduct(ci.id);
+    const sub = ci.qty * p.price; total += sub;
+    return `<tr>
+      <td>${p.title}</td>
+      <td>
+        <button class="btn ghost" data-q="-1" data-id="${p.id}">−</button>
+        <span style="padding:0 8px">${ci.qty}</span>
+        <button class="btn ghost" data-q="+1" data-id="${p.id}">+</button>
+      </td>
+      <td>${fmt(p.price)}</td>
+      <td>${fmt(sub)}</td>
+      <td><button class="btn danger" data-remove="${p.id}">Remove</button></td>
+    </tr>`;
+  }).join('');
+  qs('#cartTotal').textContent = fmt(total);
+  qs('#cartCount').textContent = String(cart.reduce((s,i)=>s+i.qty,0));
+}
+qs('#cartTable').addEventListener('click', e=>{
+  const idDec = e.target.dataset.id, q = e.target.dataset.q, rem = e.target.dataset.remove;
+  if(q && idDec){
+    const item = cart.find(c=>c.id===idDec);
+    item.qty += (q==='+1'?1:-1);
+    if(item.qty<=0) cart = cart.filter(c=>c.id!==idDec);
+    saveAll(); renderCart();
+  }
+  if(rem){
+    cart = cart.filter(c=>c.id!==rem);
+    saveAll(); renderCart();
+  }
+});
+
+qs('#placeOrder').onclick = ()=>{
+  if(!session){ qs('#cartNote').className='small error'; qs('#cartNote').textContent='Please login to place order.'; return; }
+  if(cart.length===0) return;
+  const items = cart.map(ci=>({id:ci.id, qty:ci.qty, price:findProduct(ci.id).price}));
+  const total = items.reduce((s,i)=>s+i.qty*i.price,0);
+  const id = 'LD-' + Math.floor(1000+Math.random()*9000);
+  orders.unshift({id, items, total, date: new Date().toISOString(), status:'Processing'});
+  cart = [];
+  saveAll();
+  qs('#cartNote').className='small success';
+  qs('#cartNote').textContent='Order placed! ID: '+id;
+  renderCart();
+};
+function renderOrders(){
+  const empty = qs('#ordersEmpty'), wrap = qs('#ordersWrap'), body = qs('#ordersTable');
+  if(orders.length===0){ empty.classList.remove('hidden'); wrap.classList.add('hidden'); return; }
+  empty.classList.add('hidden'); wrap.classList.remove('hidden');
+  body.innerHTML = orders.map(o=>{
+    const itemsTxt = o.items.map(i=>`${findProduct(i.id).title} ×${i.qty}`).join(', ');
+    const dt = new Date(o.date).toLocaleString();
+    return `<tr><td>${o.id}</td><td>${itemsTxt}</td><td>${fmt(o.total)}</td><td>${dt}</td><td>${o.status}</td></tr>`;
+  }).join('');
+}
+
+/* =======================
+   Wishlist (images now links)
+======================= */
+function renderWishlist(){
+  const grid = qs('#wishlistGrid');
+  if(wishlist.length===0){ grid.innerHTML=''; qs('#wishlistEmpty').classList.remove('hidden'); return; }
+  qs('#wishlistEmpty').classList.add('hidden');
+  grid.innerHTML = wishlist.map(id=>{
+    const p = findProduct(id);
+    const link = p.href || p.img;
+    return `<div class="card">
+      <a href="${link}" target="_blank" rel="noopener noreferrer">
+        <img alt="${p.title}" src="${p.img}" />
+      </a>
+      <div class="row" style="justify-content:space-between"><b>${p.title}</b><span class="stars">★ ${p.rating.toFixed(1)}</span></div>
+      <div class="row"><span class="price">${fmt(p.price)}</span> <span class="strike">${fmt(p.mrp)}</span></div>
+      <div class="row">
+        <button class="btn primary" data-wbuy="${p.id}">Add to Cart</button>
+        <button class="btn warn" data-wrem="${p.id}">Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+qs('#wishlistGrid').addEventListener('click', e=>{
+  const id1 = e.target.dataset.wbuy, id2 = e.target.dataset.wrem;
+  if(id1){ addToCart(id1,1); openCart(); }
+  if(id2){ wishlist = wishlist.filter(x=>x!==id2); saveAll(); }
+});
+
+/* =======================
+   Reviews
+======================= */
+qs('#reviewForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  const pid = qs('#reviewProduct').value;
+  const rating = Number(qs('#reviewRating').value);
+  const text = qs('#reviewText').value.trim();
+  const msg = qs('#reviewMsg');
+  if(!text) return notify(msg,'Please write a comment',false);
+  reviews.unshift({pid, rating, text, date:new Date().toISOString()});
+  qs('#reviewText').value='';
+  notify(msg,'Thanks for your review!');
+  saveAll();
+});
+function renderReviews(){
+  const list = qs('#reviewsList');
+  if(reviews.length===0){ list.innerHTML = `<div class="card small muted">No reviews yet. Be the first!</div>`; return; }
+  list.innerHTML = reviews.map(r=>{
+    const p = findProduct(r.pid);
+    const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+    return `<div class="card">
+      <div class="row" style="justify-content:space-between"><b>${p.title}</b><span class="stars">${stars}</span></div>
+      <p class="small" style="margin:6px 0">${r.text}</p>
+      <div class="muted small">${new Date(r.date).toLocaleString()}</div>
+    </div>`;
+  }).join('');
+}
+
+/* =======================
+   Customer Care / Contact
+======================= */
+qs('#careForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  const email = qs('#careEmail').value.trim();
+  const msg = qs('#careMsg').value.trim();
+  const note = qs('#careNote');
+  if(!emailRe.test(email)) return notify(note,'Enter a valid email',false);
+  if(msg.length < 5) return notify(note,'Please describe your issue',false);
+  notify(note,'Ticket submitted! We will email you shortly.');
+  e.target.reset();
+});
+
+qs('#contactForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  const email = qs('#cEmail').value.trim();
+  const note = qs('#cNote');
+  if(!emailRe.test(email)) return notify(note,'Invalid email',false);
+  notify(note,'Message sent!');
+  e.target.reset();
+});
+
+/* =======================
+   Reporting
+======================= */
+function renderReport(){
+  qs('#rUsers').textContent = String(users.length);
+  qs('#rOrders').textContent = String(orders.length);
+  const revenue = orders.reduce((s,o)=>s+o.total,0);
+  qs('#rRevenue').textContent = fmt(revenue);
+  qs('#reportHint').textContent = orders.length ? 'CSV will include Order ID, Date, Item, Qty, Unit Price, Subtotal, Status.' : 'No orders yet — CSV will be empty.';
+}
+qs('#exportCsv').onclick = ()=>{
+  const rows = [['OrderID','Date','Item','Qty','UnitPrice','Subtotal','Status']];
+  orders.forEach(o=>{
+    const date = new Date(o.date).toISOString();
+    o.items.forEach(i=>{
+      rows.push([o.id, date, findProduct(i.id).title, i.qty, i.price, i.qty*i.price, o.status]);
+    });
+  });
+  const csv = rows.map(r=>r.map(x=>`"${String(x).replaceAll('"','""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'orders.csv'; document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+};
+
+/* =======================
+   Render Root
+======================= */
+function render(){
+  renderProducts();
+  renderCart();
+  renderOrders();
+  renderWishlist();
+  renderReviews();
+  renderReport();
+}
+render();
+
+/* Restore correct wishlist button states after render */
+const observer = new MutationObserver(()=>{
+  qsa('#productGrid .product').forEach(card=>{
+    const id = card.dataset.id;
+    const btn = card.querySelector('[data-act="toggleWish"]');
+    if(!btn) return;
+    const wished = wishlist.includes(id);
+    btn.textContent = wished ? '★ Wished' : '♡ Wishlist';
+    btn.classList.toggle('warn', wished);
+    btn.classList.toggle('ghost', !wished);
+  });
+});
+observer.observe(qs('#productGrid'), {childList:true, subtree:true});
+</script>
+<footer>
+  © <span id="y"></span> LuciDeep • Demo only · Images via Unsplash queries
+</footer>
+<script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+</body>
+</html>
